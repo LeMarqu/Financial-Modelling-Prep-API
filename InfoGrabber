@@ -1,0 +1,39 @@
+from pandas_datareader import data as pdr
+from yahoo_fin import stock_info as si
+from pandas import ExcelWriter
+import yfinance as yf
+import pandas as pd
+import datetime
+import time
+import json
+yf.pdr_override()
+df1 = pd.DataFrame()
+lis = ['AAPL','AAP','MSFT','VALE']
+
+for tic in lis:
+    try:
+        # For Python 3.0 and later
+        from urllib.request import urlopen
+    except ImportError:
+        # Fall back to Python 2's urllib2
+        from urllib2 import urlopen
+    import json
+    def get_jsonparsed_data(url):
+        response = urlopen(url)
+        data = response.read().decode("utf-8")
+        return json.loads(data)
+
+    url = (f"https://financialmodelingprep.com/api/v3/ratios/{tic}?limit=1&apikey=9c42d95cf56d9661de3d89648dea89fa")
+    df = pd.DataFrame(data=get_jsonparsed_data(url))
+             
+    url2 = (f"https://financialmodelingprep.com/api/v3/key-metrics/{tic}?limit=1&apikey=9c42d95cf56d9661de3d89648dea89fa")
+    ef = pd.DataFrame(data=get_jsonparsed_data(url2))
+    """
+    url3 = (f"https://financialmodelingprep.com/api/v3/grade/{tic}?limit=1&apikey=9c42d95cf56d9661de3d89648dea89fa")
+    xf = pd.DataFrame(data=get_jsonparsed_data(url3))
+    """
+    df = df.join(ef,how='outer',rsuffix='none')
+    #df = df.join(xf,how='outer',rsuffix='Q')
+    df1 = df1.append(df)
+
+df1.to_csv('stock_list_.csv')
